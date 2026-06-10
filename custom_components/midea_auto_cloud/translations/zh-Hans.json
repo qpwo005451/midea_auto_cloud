@@ -1819,13 +1819,6 @@
           "yoga_clothes": "瑜伽服"
         }
       },
-      "dc_location_selection": {
-        "name": "烘干筒位置",
-        "state": {
-          "left": "左筒",
-          "right": "右筒"
-        }
-      },
       "dry_time": {
         "name": "烘干时长"
       },
@@ -1834,13 +1827,6 @@
       },
       "smell_time": {
         "name": "除味时长"
-      },
-      "db_location": {
-        "name": "洗衣桶位置",
-        "state": {
-          "left": "左桶",
-          "right": "右桶"
-        }
       }
     },
     "sensor": {
@@ -4518,15 +4504,6 @@
       },
       "dc_remind_sound": {
         "name": "提示音"
-      },
-      "ai_dry": {
-        "name": "AI智能烘"
-      },
-      "smell": {
-        "name": "除味"
-      },
-      "wash_dry_link": {
-        "name": "洗烘联动"
       },
       "dc_appointment": {
         "name": "烘干预约",

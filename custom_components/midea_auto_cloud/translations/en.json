@@ -1479,13 +1479,6 @@
       "dc_program": {
         "name": "Dry Program"
       },
-      "dc_location_selection": {
-        "name": "Dry Bucket Location",
-        "state": {
-          "left": "Left",
-          "right": "Right"
-        }
-      },
       "dry_time": {
         "name": "Dry Duration"
       },
@@ -1494,13 +1487,6 @@
       },
       "smell_time": {
         "name": "Deodorize Duration"
-      },
-      "db_location": {
-        "name": "Wash Bucket Location",
-        "state": {
-          "left": "Left",
-          "right": "Right"
-        }
       }
     },
     "sensor": {
@@ -4076,15 +4062,6 @@
       },
       "dc_remind_sound": {
         "name": "Reminder Sound"
-      },
-      "ai_dry": {
-        "name": "AI Smart Dry"
-      },
-      "smell": {
-        "name": "Deodorize"
-      },
-      "wash_dry_link": {
-        "name": "Wash-Dry Link"
       },
       "dc_appointment": {
         "name": "Dryer Appointment",
