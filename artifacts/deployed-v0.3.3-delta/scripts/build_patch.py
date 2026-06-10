@@ -12,6 +12,8 @@ UPSTREAM_FILES = (
     "custom_components/midea_auto_cloud/translations/zh-Hans.json",
 )
 DEPLOYED_FILES = (
+    # Preserve the deployed state verbatim, including backup residue, so the
+    # artifact bundle reflects what was actually installed on the HA host.
     "custom_components/midea_auto_cloud/device_mapping/T0xD9.py",
     "custom_components/midea_auto_cloud/device_mapping/T0xD9.py.bak",
     "custom_components/midea_auto_cloud/translations/en.json",
@@ -40,6 +42,59 @@ def git_show(repo_root: Path, spec: str) -> bytes:
         capture_output=True,
     )
     return result.stdout
+
+
+def normalize_header_path(path_token: str) -> str:
+    if path_token == "/dev/null":
+        return path_token
+    if path_token.startswith("a/upstream/"):
+        return "a/" + path_token[len("a/upstream/") :]
+    if path_token.startswith("b/upstream/"):
+        return "b/" + path_token[len("b/upstream/") :]
+    if path_token.startswith("a/deployed/"):
+        return "a/" + path_token[len("a/deployed/") :]
+    if path_token.startswith("b/deployed/"):
+        return "b/" + path_token[len("b/deployed/") :]
+    return path_token
+
+
+def normalize_patch_headers(patch_text: str) -> str:
+    normalized_lines: list[str] = []
+    for line in patch_text.splitlines(keepends=True):
+        line_content = line.rstrip("\r\n")
+        line_ending = line[len(line_content) :]
+
+        if line_content.startswith("diff --git "):
+            parts = line_content.split(" ", 3)
+            if len(parts) == 4:
+                normalized_lines.append(
+                    " ".join(
+                        (
+                            parts[0],
+                            parts[1],
+                            normalize_header_path(parts[2]),
+                            normalize_header_path(parts[3]),
+                        )
+                    )
+                    + line_ending
+                )
+                continue
+
+        if line_content.startswith("--- "):
+            normalized_lines.append(
+                f"--- {normalize_header_path(line_content[4:])}{line_ending}"
+            )
+            continue
+
+        if line_content.startswith("+++ "):
+            normalized_lines.append(
+                f"+++ {normalize_header_path(line_content[4:])}{line_ending}"
+            )
+            continue
+
+        normalized_lines.append(line)
+
+    return "".join(normalized_lines)
 
 
 def main() -> None:
@@ -86,11 +141,9 @@ def main() -> None:
         if result.returncode not in (0, 1):
             raise RuntimeError(result.stderr.decode("utf-8", errors="replace"))
 
-        patch_text = result.stdout.decode("utf-8", errors="surrogateescape")
-        patch_text = patch_text.replace("a/upstream/", "a/")
-        patch_text = patch_text.replace("b/upstream/", "b/")
-        patch_text = patch_text.replace("a/deployed/", "a/")
-        patch_text = patch_text.replace("b/deployed/", "b/")
+        patch_text = normalize_patch_headers(
+            result.stdout.decode("utf-8", errors="surrogateescape")
+        )
         if not patch_text.strip():
             raise RuntimeError("Generated patch is empty")
 

@@ -2,6 +2,8 @@
 
 This artifact bundle preserves the exact deployed local customizations that were copied from the live Home Assistant `midea_auto_cloud` integration, without editing `custom_components/midea_auto_cloud/` in this repo.
 
+The goal is deployed-state preservation, not a source-only cleanup. The saved live files and generated patch intentionally reproduce deployed residue verbatim, including the extra `device_mapping/T0xD9.py.bak` backup file, so future maintenance can start from what was actually installed.
+
 ## Preserved live files
 
 - `live/custom_components/midea_auto_cloud/device_mapping/T0xD9.py`
@@ -15,6 +17,12 @@ This artifact bundle preserves the exact deployed local customizations that were
 - `translations/en.json`: adds English names and states for the deployed D9 washer/dryer entities and keeps the deployed wording overrides that ship with the live customization.
 - `translations/zh-Hans.json`: adds Simplified Chinese names and states for the same D9 washer/dryer entities and keeps the deployed wording overrides from the live customization.
 - `device_mapping/T0xD9.py.bak`: extra deployed backup file. Its line content matches upstream `v0.3.3` `T0xD9.py`; the live copy is preserved as-is from the deployment.
+
+## Patch scope
+
+- `patches/upstream-v0.3.3-to-deployed.patch` is a deployed-state reproduction artifact.
+- It includes both functional deltas and non-functional deployed residue that existed on the live system at capture time.
+- In particular, the patch intentionally includes the added `T0xD9.py.bak` file even though it is backup residue rather than a functional upstream-source change.
 
 ## Customized functional areas
 
@@ -30,4 +38,4 @@ The patch at `patches/upstream-v0.3.3-to-deployed.patch` was produced from actua
 1. Copy the live deployed files into `live/custom_components/midea_auto_cloud/...`.
 2. Run `python artifacts/deployed-v0.3.3-delta/scripts/build_patch.py` from the repo root.
 3. The script exports upstream `v0.3.3` blobs with `git show`, stages them beside the preserved live copies in a temporary directory, and runs `git diff --no-index`.
-4. The saved patch normalizes the diff labels to `a/custom_components/...` and `b/custom_components/...` for readability.
+4. The saved patch normalizes only the patch header labels to `a/custom_components/...` and `b/custom_components/...` for readability, while leaving diff body content untouched.
