@@ -1,0 +1,1408 @@
+diff --git a/custom_components/midea_auto_cloud/device_mapping/T0xD9.py b/custom_components/midea_auto_cloud/device_mapping/T0xD9.py
+index 6fb3636a5c61c6329887418aee282f59056281fe..64303383154ef1ef9e6f0cff528b112dd5b8d9d7 100644
+--- a/custom_components/midea_auto_cloud/device_mapping/T0xD9.py
++++ b/custom_components/midea_auto_cloud/device_mapping/T0xD9.py
+@@ -1,3 +1,12 @@
++# T0xD9.py — 修改版（基于 v0.3.3 原始文件扩展 dc_* 烘干桶实体）
++# 修改内容：
++#   1. queries 增加 dc 查询，获取烘干桶状态
++#   2. 新增 dc_* SELECT/SWITCH/SENSOR 实体
++#   3. 新增 db_wash_dry_link 洗烘联动开关
++#   4. 新增预约功能（dc/db appointment 开关 + 时间设置 + 结束时间）
++#
++# 所有 dc_* value 映射来自 T_0000_D9_13108_2023121501.lua
++
+ from homeassistant.const import Platform, UnitOfElectricPotential, UnitOfTemperature, UnitOfTime
+ from homeassistant.components.sensor import SensorStateClass, SensorDeviceClass
+ from homeassistant.components.binary_sensor import BinarySensorDeviceClass
+@@ -6,7 +15,7 @@ from homeassistant.components.switch import SwitchDeviceClass
+ DEVICE_MAPPING = {
+     "default": {
+         "rationale": ["off", "on"],
+-        "queries": [{"query_type": "db"}],
++        "queries": [{"query_type": "db"}, {"query_type": "dc"}],
+         "calculate": {
+             "get": [
+                 {
+@@ -37,21 +46,97 @@ DEVICE_MAPPING = {
+                 }
+             },
+             Platform.SWITCH: {
++                # ---- db 洗衣桶（原有） ----
+                 "db_power": {
+                     "device_class": SwitchDeviceClass.SWITCH,
+                 },
+                 "db_control_status": {
+                     "device_class": SwitchDeviceClass.SWITCH,
+                     "rationale": ["pause", "start"],
+-                    "translation_key": "control_status",
++                    "translation_key": "db_control_status",
+                 },
+                 "db_baby_lock": {
+                     "device_class": SwitchDeviceClass.SWITCH,
+                     "rationale": [0, 1],
+-                    "translation_key": "child_lock",
+-                }
++                    "translation_key": "db_baby_lock",
++                },
++                # ---- db 洗烘联动（新增） ----
++                "db_wash_dry_link": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "wash_dry_link",
++                },
++                # ---- dc 烘干桶（新增） ----
++                "dc_power": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                },
++                "dc_control_status": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": ["pause", "start"],
++                    "translation_key": "dc_control_status",
++                },
++                "dc_baby_lock": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "dc_baby_lock",
++                },
++                "dc_steam": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_prevent_wrinkle": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_ai": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "ai_dry",
++                },
++                "dc_smell": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "smell",
++                },
++                "dc_intelligent_dampproof": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_multidimensional_sterilize": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_cycle_memory": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "cycle_memory",
++                },
++                "dc_light": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_sterilize": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                "dc_remind_sound": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                },
++                # ---- 预约功能 ----
++                "dc_appointment": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "dc_appointment",
++                },
++                "db_appointment": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "db_appointment",
++                },
+             },
+             Platform.SELECT: {
++                # ---- db 洗衣桶（原有） ----
+                 "db_location_selection": {
+                     "options": {
+                         "left": {"db_location_selection": "left"},
+@@ -124,11 +209,134 @@ DEVICE_MAPPING = {
+                         "定时180": {"db_dry": 11},
+                         "定时120": {"db_dry": 7},
+                         "定时60": {"db_dry": 5},
+-                        "定时30": {"db_dry": 4}              
++                        "定时30": {"db_dry": 4}
+                     }
+-                }
++                },
++                # ---- dc 烘干桶（新增） ----
++                "dc_program": {
++                    "options": {
++                        "棉织物": {"dc_program": "cotton"},
++                        "化纤": {"dc_program": "fiber"},
++                        "混合洗": {"dc_program": "mixed_wash"},
++                        "牛仔": {"dc_program": "jean"},
++                        "床单": {"dc_program": "bedsheet"},
++                        "户外服": {"dc_program": "outdoor"},
++                        "羽绒服": {"dc_program": "down_jacket"},
++                        "毛绒": {"dc_program": "plush"},
++                        "羊毛": {"dc_program": "wool"},
++                        "除湿": {"dc_program": "dehumidify"},
++                        "冷风清新": {"dc_program": "cold_air_fresh_air"},
++                        "热风烘干": {"dc_program": "hot_air_dry"},
++                        "运动服": {"dc_program": "sport_clothes"},
++                        "内衣": {"dc_program": "underwear"},
++                        "婴童装": {"dc_program": "baby_clothes"},
++                        "衬衫": {"dc_program": "shirt"},
++                        "标准": {"dc_program": "standard"},
++                        "快烘": {"dc_program": "quick_dry"},
++                        "清新": {"dc_program": "fresh_air"},
++                        "低温烘": {"dc_program": "low_temp_dry"},
++                        "节能烘": {"dc_program": "eco_dry"},
++                        "智能烘": {"dc_program": "intelligent_dry"},
++                        "蒸汽护理": {"dc_program": "steam_care"},
++                        "大物": {"dc_program": "big"},
++                        "定时烘": {"dc_program": "fixed_time_dry"},
++                        "夜间烘": {"dc_program": "night_dry"},
++                        "支架烘": {"dc_program": "bracket_dry"},
++                        "西裤": {"dc_program": "western_trouser"},
++                        "除潮": {"dc_program": "dehumidification"},
++                        "丝绸": {"dc_program": "silk"},
++                        "筒自洁": {"dc_program": "bucket_self_clean"},
++                        "离子除菌": {"dc_program": "ion_degerm"},
++                        "AI智能烘": {"dc_program": "ai_intelligent_dry"},
++                        "小件": {"dc_program": "small"},
++                        "夹克": {"dc_program": "jacket"},
++                        "空气洗": {"dc_program": "air_wash"},
++                        "毛巾": {"dc_program": "towel"},
++                        "四件套": {"dc_program": "four_piece_suit"},
++                        "轻柔烘": {"dc_program": "light_dry"},
++                        "除菌": {"dc_program": "degerm"},
++                        "羊毛护理": {"dc_program": "wool_care"},
++                        "晒被": {"dc_program": "sun_quilt"},
++                        "工装": {"dc_program": "uniforms"},
++                        "轻柔烘羊毛": {"dc_program": "light_dry_wool"},
++                        "轻柔烘衬衫": {"dc_program": "light_dry_shirt"},
++                        "轻柔烘羽绒": {"dc_program": "light_dry_down_jacket"},
++                        "轻柔烘丝绸": {"dc_program": "light_dry_silk"},
++                        "轻柔烘大物": {"dc_program": "light_dry_big"},
++                        "轻柔烘棉织物": {"dc_program": "light_dry_cotton"},
++                        "轻柔烘皮草": {"dc_program": "light_dry_mink_skin"},
++                        "轻柔烘毛巾": {"dc_program": "light_dry_towel"},
++                        "轻柔烘西装": {"dc_program": "light_dry_suit"},
++                        "轻柔烘睡衣": {"dc_program": "light_dry_pajamas"},
++                        "轻柔烘婴童暖衣": {"dc_program": "light_dry_baby_warm_clothe"},
++                        "轻柔烘季节驱散": {"dc_program": "light_dry_seasonal_dispel"},
++                        "轻柔烘毛绒玩具": {"dc_program": "light_dry_plush_toy"},
++                        "轻柔烘皮革护理": {"dc_program": "light_dry_leather_clothe_care"},
++                        "轻柔烘毛呢大衣": {"dc_program": "light_dry_wool_coat"},
++                        "轻柔烘蚕丝被": {"dc_program": "light_dry_silk_quilt"},
++                        "轻柔烘派克服": {"dc_program": "light_dry_pizex"},
++                        "轻柔烘雪纺": {"dc_program": "light_dry_chiffon"},
++                        "速烘衣物": {"dc_program": "quick_dry_clothes"},
++                        "瑜伽服": {"dc_program": "yoga_clothes"},
++                    },
++                    "translation_key": "dc_program"
++                },
++                "dc_dry_time": {
++                    "options": {
++                        "关闭": {"dc_dry_time": 0},
++                        "30分钟": {"dc_dry_time": 30},
++                        "60分钟": {"dc_dry_time": 60},
++                        "90分钟": {"dc_dry_time": 90},
++                        "120分钟": {"dc_dry_time": 120},
++                        "180分钟": {"dc_dry_time": 180},
++                        "240分钟": {"dc_dry_time": 240},
++                    },
++                    "translation_key": "dry_time"
++                },
++                "dc_temperature_level": {
++                    "options": {
++                        "低温": {"dc_temperature_level": 0},
++                        "中温": {"dc_temperature_level": 1},
++                        "高温": {"dc_temperature_level": 2},
++                    },
++                    "translation_key": "temperature_level"
++                },
++                "dc_smell_time": {
++                    "options": {
++                        "关闭": {"dc_smell_time": 0},
++                        "30分钟": {"dc_smell_time": 30},
++                        "60分钟": {"dc_smell_time": 60},
++                        "90分钟": {"dc_smell_time": 90},
++                        "120分钟": {"dc_smell_time": 120},
++                    },
++                    "translation_key": "smell_time"
++                },
++                "dc_location_selection": {
++                    "options": {
++                        "left": {"dc_location_selection": "left"},
++                        "right": {"dc_location_selection": "right"}
++                    }
++                },
++            },
++            Platform.NUMBER: {
++                # ---- 预约时间设置（分钟） ----
++                "dc_appointment_time": {
++                    "min": 30,
++                    "max": 1440,
++                    "step": 30,
++                    "unit_of_measurement": UnitOfTime.MINUTES,
++                    "translation_key": "dc_appointment_time",
++                },
++                "db_appointment_time": {
++                    "min": 30,
++                    "max": 1440,
++                    "step": 30,
++                    "unit_of_measurement": UnitOfTime.MINUTES,
++                    "translation_key": "db_appointment_time",
++                },
+             },
+             Platform.SENSOR: {
++                # ---- db 洗衣桶（原有） ----
+                 "db_remain_time": {
+                     "device_class": SensorDeviceClass.DURATION,
+                     "unit_of_measurement": UnitOfTime.MINUTES,
+@@ -145,7 +353,39 @@ DEVICE_MAPPING = {
+                 },
+                 "db_error_code": {
+                     "device_class": SensorDeviceClass.ENUM
+-                }
++                },
++                # ---- dc 烘干桶（新增） ----
++                "dc_remain_time": {
++                    "device_class": SensorDeviceClass.DURATION,
++                    "unit_of_measurement": UnitOfTime.MINUTES,
++                    "state_class": SensorStateClass.MEASUREMENT
++                },
++                "dc_running_status": {
++                    "device_class": SensorDeviceClass.ENUM,
++                    "translation_key": "dc_running_status"
++                },
++                "dc_dry_status": {
++                    "device_class": SensorDeviceClass.ENUM,
++                    "translation_key": "dc_dry_status"
++                },
++                "dc_error_code": {
++                    "device_class": SensorDeviceClass.ENUM
++                },
++                "dc_intensity": {
++                    "device_class": SensorDeviceClass.ENUM,
++                },
++                "dc_material": {
++                    "device_class": SensorDeviceClass.ENUM,
++                },
++                # ---- 预约结束时间 ----
++                "dc_appointment_end_time": {
++                    "device_class": SensorDeviceClass.TIMESTAMP,
++                    "translation_key": "dc_appointment_end_time",
++                },
++                "db_appointment_end_time": {
++                    "device_class": SensorDeviceClass.TIMESTAMP,
++                    "translation_key": "db_appointment_end_time",
++                },
+             }
+         }
+     }
+diff --git a/custom_components/midea_auto_cloud/device_mapping/T0xD9.py.bak b/custom_components/midea_auto_cloud/device_mapping/T0xD9.py.bak
+new file mode 100644
+index 0000000000000000000000000000000000000000..6fb3636a5c61c6329887418aee282f59056281fe
+--- /dev/null
++++ b/custom_components/midea_auto_cloud/device_mapping/T0xD9.py.bak
+@@ -0,0 +1,152 @@
++from homeassistant.const import Platform, UnitOfElectricPotential, UnitOfTemperature, UnitOfTime
++from homeassistant.components.sensor import SensorStateClass, SensorDeviceClass
++from homeassistant.components.binary_sensor import BinarySensorDeviceClass
++from homeassistant.components.switch import SwitchDeviceClass
++
++DEVICE_MAPPING = {
++    "default": {
++        "rationale": ["off", "on"],
++        "queries": [{"query_type": "db"}],
++        "calculate": {
++            "get": [
++                {
++                    "lvalue": "[remaining_time]",
++                    "rvalue": "[db_remain_time]"
++                }
++            ],
++            "set": {
++            }
++        },
++        "entities": {
++            Platform.BINARY_SENSOR: {
++                "db_door_opened": {
++                    "device_class": BinarySensorDeviceClass.OPENING,
++                    "translation_key": "door_opened"
++                },
++                "db_bucket_water_overheating": {
++                    "device_class": BinarySensorDeviceClass.PROBLEM,
++                    "translation_key": "bucket_water_overheating"
++                },
++                "db_drying_tunnel_overheating": {
++                    "device_class": BinarySensorDeviceClass.PROBLEM,
++                    "translation_key": "drying_tunnel_overheating"
++                },
++                "db_detergent_needed": {
++                    "device_class": BinarySensorDeviceClass.PROBLEM,
++                    "translation_key": "detergent_lack"
++                }
++            },
++            Platform.SWITCH: {
++                "db_power": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                },
++                "db_control_status": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": ["pause", "start"],
++                    "translation_key": "control_status",
++                },
++                "db_baby_lock": {
++                    "device_class": SwitchDeviceClass.SWITCH,
++                    "rationale": [0, 1],
++                    "translation_key": "child_lock",
++                }
++            },
++            Platform.SELECT: {
++                "db_location_selection": {
++                    "options": {
++                        "left": {"db_location_selection": "left"},
++                        "right": {"db_location_selection": "right"}
++                    }
++                },
++                "db_program": {
++                    "options": {
++                        "baby_clothes": {"db_program": "baby_clothes"},
++                        "baby_clothes_dry": {"db_program": 151},
++                        "clean_stains": {"db_program": "clean_stains"},
++                        "cold_wash": {"db_program": "cold_wash"},
++                        "cook_wash": {"db_program": "cook_wash"},
++                        "fast_wash": {"db_program": 137},
++                        "hot_wind_dry": {"db_program": 153},
++                        "rinsing_dehydration": {"db_program": "rinsing_dehydration"},
++                        "self_wash_5": {"db_program": "self_wash_5"},
++                        "single_dehytration": {"db_program": "single_dehytration"},
++                        "single_drying": {"db_program": "single_drying"},
++                        "small_wash_dry": {"db_program": 138},
++                        "socks": {"db_program": 148},
++                        "standard": {"db_program": "standard"},
++                        "underpants": {"db_program": 156},
++                        "underwear": {"db_program": "underwear"},
++                        "water_ssp": {"db_program": "water_ssp"}
++                   }
++                },
++                "db_temperature": {
++                    "options": {
++                        "冷水": {"db_temperature": 0},
++                        "30℃": {"db_temperature": 3},
++                        "40℃": {"db_temperature": 4},
++                        "60℃": {"db_temperature": 5},
++                        "95℃": {"db_temperature": 6}
++                    },
++                    "translation_key": "temperature"
++                },
++                "db_detergent": {
++                    "options": {
++                        "关闭": {"db_detergent": 0},
++                        "L1": {"db_detergent": 1},
++                        "L2": {"db_detergent": 2},
++                        "L3": {"db_detergent": 3}
++                    },
++                    "translation_key": "detergent"
++                },
++                "db_dehydration_speed": {
++                    "options": {
++                        "免脱水": {"db_dehydration_speed": 0},
++                        "800转": {"db_dehydration_speed": 3},
++                        "1000转": {"db_dehydration_speed": 4}
++                    },
++                    "translation_key": "dehydration_speed"
++                },
++                "db_rinse_count": {
++                    "options": {
++                        "1次": {"db_rinse_count": 1},
++                        "2次": {"db_rinse_count": 2},
++                        "3次": {"db_rinse_count": 3},
++                        "4次": {"db_rinse_count": 4},
++                        "5次": {"db_rinse_count": 5}
++                    },
++                    "translation_key": "soak_count"
++                },
++                "db_dry": {
++                    "options": {
++                        "关闭": {"db_dry": 0},
++                        "智能": {"db_dry": 1},
++                        "定时240": {"db_dry": 12},
++                        "定时180": {"db_dry": 11},
++                        "定时120": {"db_dry": 7},
++                        "定时60": {"db_dry": 5},
++                        "定时30": {"db_dry": 4}              
++                    }
++                }
++            },
++            Platform.SENSOR: {
++                "db_remain_time": {
++                    "device_class": SensorDeviceClass.DURATION,
++                    "unit_of_measurement": UnitOfTime.MINUTES,
++                    "state_class": SensorStateClass.MEASUREMENT
++                },
++                "db_progress": {
++                    "device_class": SensorDeviceClass.BATTERY,
++                    "unit_of_measurement": "%",
++                    "state_class": SensorStateClass.MEASUREMENT
++                },
++                "db_running_status": {
++                    "device_class": SensorDeviceClass.ENUM,
++                    "translation_key": "running_status"
++                },
++                "db_error_code": {
++                    "device_class": SensorDeviceClass.ENUM
++                }
++            }
++        }
++    }
++}
+diff --git a/custom_components/midea_auto_cloud/translations/en.json b/custom_components/midea_auto_cloud/translations/en.json
+index 88346d8c69317dd82a889ecaa168fddb08ce56d4..3cb9e2fb74cafef894e1fdb8aed12453f3912493 100644
+--- a/custom_components/midea_auto_cloud/translations/en.json
++++ b/custom_components/midea_auto_cloud/translations/en.json
+@@ -145,6 +145,15 @@
+       },
+       "middle_stove_off": {
+         "name": "Middle stove off"
++      },
++      "pause_wash": {
++        "name": "Pause Wash"
++      },
++      "start_wash": {
++        "name": "Start Wash"
++      },
++      "stop_wash": {
++        "name": "Stop Wash"
+       }
+     },
+     "binary_sensor": {
+@@ -334,7 +343,7 @@
+       "standby_status": {
+         "name": "Standby Status"
+       },
+-	  "out_water": {
++      "out_water": {
+         "name": "Out Water"
+       },
+       "out_hot_water": {
+@@ -342,6 +351,12 @@
+       },
+       "on_seat": {
+         "name": "On Seat"
++      },
++      "db_power": {
++        "name": "Washer Power"
++      },
++      "Status": {
++        "name": "Status"
+       }
+     },
+     "climate": {
+@@ -393,8 +408,7 @@
+               "vertical_only": "Vertical Swing"
+             }
+           }
+-        }
+-        ,
++        },
+         "state": {
+           "off": "off",
+           "auto": "auto"
+@@ -610,7 +624,7 @@
+       "dry_step_switch": {
+         "name": "Dry Step Switch",
+         "state": {
+-           "cancel": "Cancel",
++          "cancel": "Cancel",
+           "waiting": "Standby",
+           "running": "Running"
+         }
+@@ -719,19 +733,19 @@
+           "300": "300s"
+         }
+       },
+-		"fresh_air_mode_select": {
+-		    "name": "Mode",
+-		    "state": {
+-		        "normal": "Normal",
+-		        "smart": "Smart",
+-		        "manual_recirculation": "Manual Recirculation",
+-		        "auto_recirculation": "Auto Recirculation",
+-		        "supply_air_gentle": "Gentle Supply Air",
+-		        "supply_air_fast": "Fast Supply Air",
+-		        "exhaust_air_gentle": "Gentle Exhaust Air",
+-		        "exhaust_air_fast": "Fast Exhaust Air"
+-		    }
+-		},
++      "fresh_air_mode_select": {
++        "name": "Mode",
++        "state": {
++          "normal": "Normal",
++          "smart": "Smart",
++          "manual_recirculation": "Manual Recirculation",
++          "auto_recirculation": "Auto Recirculation",
++          "supply_air_gentle": "Gentle Supply Air",
++          "supply_air_fast": "Fast Supply Air",
++          "exhaust_air_gentle": "Gentle Exhaust Air",
++          "exhaust_air_fast": "Fast Exhaust Air"
++        }
++      },
+       "dehydration_speed": {
+         "name": "Dehydration Speed"
+       },
+@@ -1409,7 +1423,7 @@
+           "5": "High"
+         }
+       },
+-	  "clean_interval": {
++      "clean_interval": {
+         "name": "Clean Interval",
+         "state": {
+           "0": "OFF",
+@@ -1428,6 +1442,32 @@
+           "4": "Medium High",
+           "5": "High"
+         }
++      },
++      "dc_program": {
++        "name": "Dry Program"
++      },
++      "dc_location_selection": {
++        "name": "Dry Bucket Location",
++        "state": {
++          "left": "Left",
++          "right": "Right"
++        }
++      },
++      "dry_time": {
++        "name": "Dry Duration"
++      },
++      "temperature_level": {
++        "name": "Temperature Level"
++      },
++      "smell_time": {
++        "name": "Deodorize Duration"
++      },
++      "db_location": {
++        "name": "Wash Bucket Location",
++        "state": {
++          "left": "Left",
++          "right": "Right"
++        }
+       }
+     },
+     "sensor": {
+@@ -1473,7 +1513,7 @@
+       "fresh_filter_time": {
+         "name": "Filter remaining life"
+       },
+-     "tips_code": {
++      "tips_code": {
+         "name": "Tips Code"
+       },
+       "version": {
+@@ -1554,7 +1594,7 @@
+       },
+       "b7_left_status": {
+         "name": "Left Stove Status",
+-          "state": {
++        "state": {
+           "initial": "Initial",
+           "power_off": "Power Off",
+           "working": "Working",
+@@ -1566,7 +1606,7 @@
+       },
+       "b7_right_status": {
+         "name": "Right Stove Status",
+-          "state": {
++        "state": {
+           "initial": "Initial",
+           "power_off": "Power Off",
+           "working": "Working",
+@@ -2164,7 +2204,7 @@
+       "end_time_minute": {
+         "name": "End Time Minute"
+       },
+-	  "end_time": {
++      "end_time": {
+         "name": "Heat End Time"
+       },
+       "flow": {
+@@ -2428,7 +2468,7 @@
+       "life_2": {
+         "name": "MPC Filter Cartridge Lifespan"
+       },
+-	  "life_2_pcb": {
++      "life_2_pcb": {
+         "name": "Life2_PCB"
+       },
+       "water_consumption": {
+@@ -2575,7 +2615,7 @@
+       "total_elec_value": {
+         "name": "Total Electricity"
+       },
+-	  "clean_water_consumption_next_remaining": {
++      "clean_water_consumption_next_remaining": {
+         "name": "Clean Water Consumption Next Remaining"
+       },
+       "clean_interval_next_days_remaining": {
+@@ -2583,6 +2623,30 @@
+       },
+       "filter_use_per": {
+         "name": "Filter Use Percentage"
++      },
++      "dc_remain_time": {
++        "name": "Dry Remaining Time"
++      },
++      "dc_running_status": {
++        "name": "Dry Running Status"
++      },
++      "dc_dry_status": {
++        "name": "Dry Status"
++      },
++      "dc_error_code": {
++        "name": "Dry Error Code"
++      },
++      "dc_intensity": {
++        "name": "Dry Intensity"
++      },
++      "dc_material": {
++        "name": "Dry Material"
++      },
++      "dc_appointment_end_time": {
++        "name": "Dryer Appointment End Time"
++      },
++      "db_appointment_end_time": {
++        "name": "Washer Appointment End Time"
+       }
+     },
+     "light": {
+@@ -2628,10 +2692,10 @@
+         "name": "Lightness"
+       },
+       "custom_timing": {
+-        "name": "Light Off Timer" 
++        "name": "Light Off Timer"
+       },
+       "radar_induction_closing_time": {
+-        "name": "Night Light Timer" 
++        "name": "Night Light Timer"
+       },
+       "keep_warm_time": {
+         "name": "Keep Warm Time"
+@@ -2720,7 +2784,7 @@
+       "rinse_level": {
+         "name": "Rinse Level"
+       },
+-	  "clean_water_consumption": {
++      "clean_water_consumption": {
+         "name": "Clean Water Consumption"
+       },
+       "quantify_21": {
+@@ -2767,6 +2831,12 @@
+       },
+       "area2_gear": {
+         "name": "Double Area Area 2 Gear"
++      },
++      "dc_appointment_time": {
++        "name": "Dryer Appointment Duration"
++      },
++      "db_appointment_time": {
++        "name": "Washer Appointment Duration"
+       }
+     },
+     "fan": {
+@@ -2787,19 +2857,19 @@
+         }
+       }
+     },
+-  "switch": {
+-    "efficient": {
++    "switch": {
++      "efficient": {
+         "name": "Low Power Insulation"
+       },
+-	  "prevent_super_cool": {
++      "prevent_super_cool": {
+         "name": "Prevent Super Cool"
+       },
+-		"new_wind_machine": {
+-			"name": "Fresh air switch"
+-		},
+-		"anion_status": {
+-			"name": "Sterilization"
+-		},
++      "new_wind_machine": {
++        "name": "Fresh air switch"
++      },
++      "anion_status": {
++        "name": "Sterilization"
++      },
+       "radar_induction_enable": {
+         "name": "Radar Induction"
+       },
+@@ -2845,9 +2915,6 @@
+       "anion": {
+         "name": "Anion"
+       },
+-      "child_lock": {
+-        "name": "Child Lock"
+-      },
+       "airswitch": {
+         "name": "Drying Storage Switch"
+       },
+@@ -2857,9 +2924,6 @@
+       "filter_tip": {
+         "name": "Filter Tip"
+       },
+-      "control_status": {
+-        "name": "Start Pause"
+-      },
+       "add_water_flag": {
+         "name": "Add Water Flag"
+       },
+@@ -2929,7 +2993,7 @@
+       "hot_power": {
+         "name": "Hot Power"
+       },
+-	  "heat_function": {
++      "heat_function": {
+         "name": "Heat Function"
+       },
+       "midea_manager": {
+@@ -3046,9 +3110,6 @@
+       "airdry_on_off": {
+         "name": "Air Dry On Off"
+       },
+-      "appointment": {
+-        "name": "Appointment"
+-      },
+       "aux_heat": {
+         "name": "Aux Heat"
+       },
+@@ -3128,7 +3189,7 @@
+         "name": "Day Time State"
+       },
+       "db_baby_lock": {
+-        "name": "DB Baby Lock"
++        "name": "Washer Child Lock"
+       },
+       "db_clean_notification": {
+         "name": "DB Clean Notification"
+@@ -3155,7 +3216,7 @@
+         "name": "DB Steam Wash"
+       },
+       "db_wash_dry_link": {
+-        "name": "DB Wash Dry Link"
++        "name": "Wash-Dry Link"
+       },
+       "defrost_state": {
+         "name": "Defrost State"
+@@ -3775,7 +3836,7 @@
+       "forcetbh_state": {
+         "name": "Force Standby"
+       },
+-	  "manul_humi": {
++      "manul_humi": {
+         "name": "humidification"
+       },
+       "manul_humi_value": {
+@@ -3820,7 +3881,7 @@
+       "auto_eco": {
+         "name": "Auto Eco"
+       },
+-	  "open_close_switch": {
++      "open_close_switch": {
+         "name": "Open Close Switch"
+       },
+       "start_clean": {
+@@ -3867,10 +3928,87 @@
+       },
+       "sleep_state5": {
+         "name": "Sleep 5"
++      },
++      "dc_power": {
++        "name": "Dryer Power",
++        "state": {
++          "off": "Off",
++          "on": "On"
++        }
++      },
++      "dc_control_status": {
++        "name": "Dryer Start/Stop",
++        "state": {
++          "pause": "Pause",
++          "start": "Start"
++        }
++      },
++      "dc_baby_lock": {
++        "name": "Dryer Child Lock"
++      },
++      "dc_steam": {
++        "name": "Steam"
++      },
++      "dc_prevent_wrinkle": {
++        "name": "Wrinkle Prevention"
++      },
++      "dc_ai": {
++        "name": "AI Smart Dry"
++      },
++      "dc_smell": {
++        "name": "Deodorize"
++      },
++      "dc_intelligent_dampproof": {
++        "name": "Smart Damp Proof"
++      },
++      "dc_multidimensional_sterilize": {
++        "name": "Multi-D Sterilize"
++      },
++      "dc_cycle_memory": {
++        "name": "Cycle Memory"
++      },
++      "dc_light": {
++        "name": "Dryer Light"
++      },
++      "dc_sterilize": {
++        "name": "Sterilize"
++      },
++      "dc_remind_sound": {
++        "name": "Reminder Sound"
++      },
++      "ai_dry": {
++        "name": "AI Smart Dry"
++      },
++      "smell": {
++        "name": "Deodorize"
++      },
++      "wash_dry_link": {
++        "name": "Wash-Dry Link"
++      },
++      "dc_appointment": {
++        "name": "Dryer Appointment",
++        "state": {
++          "off": "Off",
++          "on": "On"
++        }
++      },
++      "db_appointment": {
++        "name": "Washer Appointment",
++        "state": {
++          "off": "Off",
++          "on": "On"
++        }
++      },
++      "db_control_status": {
++        "name": "Washer Start/Stop",
++        "state": {
++          "pause": "Pause",
++          "start": "Start"
++        }
+       }
+     },
+-  "vacuum": {
+     "vacuum": {
++      "vacuum": {
+         "name": "Robotic Vacuum",
+         "state_attributes": {
+           "fan_speed": {
+@@ -3885,4 +4023,4 @@
+       }
+     }
+   }
+-}
++}
+\ No newline at end of file
+diff --git a/custom_components/midea_auto_cloud/translations/zh-Hans.json b/custom_components/midea_auto_cloud/translations/zh-Hans.json
+index 19f9e03b458543fede53e7164557d7ae7ba19444..31fdf98e03a85fb5007520e7f93413f7b2b6011d 100644
+--- a/custom_components/midea_auto_cloud/translations/zh-Hans.json
++++ b/custom_components/midea_auto_cloud/translations/zh-Hans.json
+@@ -145,6 +145,15 @@
+       },
+       "middle_stove_off": {
+         "name": "中灶关火"
++      },
++      "pause_wash": {
++        "name": "暂停洗涤"
++      },
++      "start_wash": {
++        "name": "开始洗涤"
++      },
++      "stop_wash": {
++        "name": "停止洗涤"
+       }
+     },
+     "binary_sensor": {
+@@ -362,6 +371,12 @@
+       },
+       "on_seat": {
+         "name": "坐圈状态"
++      },
++      "db_power": {
++        "name": "洗衣机电源"
++      },
++      "Status": {
++        "name": "状态"
+       }
+     },
+     "climate": {
+@@ -413,8 +428,7 @@
+               "vertical_only": "上下摆风"
+             }
+           }
+-        }
+-        ,
++        },
+         "state": {
+           "off": "关闭",
+           "auto": "自动"
+@@ -601,12 +615,12 @@
+         "name": "加湿器",
+         "state_attributes": {
+           "mode": {
+-              "state": {
+-                  "auto": "AI湿随温变",
+-                  "manual": "手动",
+-                  "moist_skin": "润肤",
+-                  "sleep": "睡眠"
+-              }
++            "state": {
++              "auto": "AI湿随温变",
++              "manual": "手动",
++              "moist_skin": "润肤",
++              "sleep": "睡眠"
++            }
+           }
+         }
+       },
+@@ -753,19 +767,19 @@
+           "300": "300秒"
+         }
+       },
+-		"fresh_air_mode_select": {
++      "fresh_air_mode_select": {
+         "name": "模式",
+         "state": {
+-			  "normal": "普通",
+-		  	"smart": "智能",
+-			  "manual_recirculation": "手动内循环",
+-			  "auto_recirculation": "自动内循环",
+-			  "supply_air_gentle": "舒缓进风",
+-			  "supply_air_fast": "快速进风",
+-			  "exhaust_air_gentle": "舒缓排风",
+-			  "exhaust_air_fast": "快速排风"
++          "normal": "普通",
++          "smart": "智能",
++          "manual_recirculation": "手动内循环",
++          "auto_recirculation": "自动内循环",
++          "supply_air_gentle": "舒缓进风",
++          "supply_air_fast": "快速进风",
++          "exhaust_air_gentle": "舒缓排风",
++          "exhaust_air_fast": "快速排风"
+         }
+-    },
++      },
+       "dehydration_speed": {
+         "name": "转速"
+       },
+@@ -883,10 +897,10 @@
+       "bright_led": {
+         "name": "亮度LED",
+         "state": {
+-            "light": "亮",
+-            "dark": "暗",
+-            "exit": "熄灭"
+-          }
++          "light": "亮",
++          "dark": "暗",
++          "exit": "熄灭"
++        }
+       },
+       "capacity": {
+         "name": "容量"
+@@ -1079,7 +1093,7 @@
+       },
+       "gesture_sensitivity_value": {
+         "name": "手势灵敏度",
+-          "state": {
++        "state": {
+           "low": "低",
+           "medium": "中",
+           "high": "高"
+@@ -1432,7 +1446,7 @@
+           "resume": "继续",
+           "charge": "开始回充",
+           "charge_pause": "回充暂停",
+-          "charge_continue":  "继续回充",
++          "charge_continue": "继续回充",
+           "auto_clean": "自动清扫",
+           "auto_clean_pause": "清扫暂停",
+           "auto_clean_continue": "继续清扫",
+@@ -1501,7 +1515,7 @@
+       "gear": {
+         "name": "档位",
+         "state": {
+-          "off":"关闭",
++          "off": "关闭",
+           "low": "低",
+           "medium": "中",
+           "high": "高",
+@@ -1689,6 +1703,97 @@
+           "4": "中高档",
+           "5": "高档"
+         }
++      },
++      "dc_program": {
++        "name": "烘干程序",
++        "state": {
++          "cotton": "棉织物",
++          "fiber": "化纤",
++          "mixed_wash": "混合洗",
++          "jean": "牛仔",
++          "bedsheet": "床单",
++          "outdoor": "户外服",
++          "down_jacket": "羽绒服",
++          "plush": "毛绒",
++          "wool": "羊毛",
++          "dehumidify": "除湿",
++          "cold_air_fresh_air": "冷风清新",
++          "hot_air_dry": "热风烘干",
++          "sport_clothes": "运动服",
++          "underwear": "内衣",
++          "baby_clothes": "婴童装",
++          "shirt": "衬衫",
++          "standard": "标准",
++          "quick_dry": "快烘",
++          "fresh_air": "清新",
++          "low_temp_dry": "低温烘",
++          "eco_dry": "节能烘",
++          "intelligent_dry": "智能烘",
++          "steam_care": "蒸汽护理",
++          "big": "大物",
++          "fixed_time_dry": "定时烘",
++          "night_dry": "夜间烘",
++          "bracket_dry": "支架烘",
++          "western_trouser": "西裤",
++          "dehumidification": "除潮",
++          "silk": "丝绸",
++          "bucket_self_clean": "筒自洁",
++          "ion_degerm": "离子除菌",
++          "ai_intelligent_dry": "AI智能烘",
++          "small": "小件",
++          "jacket": "夹克",
++          "air_wash": "空气洗",
++          "towel": "毛巾",
++          "four_piece_suit": "四件套",
++          "light_dry": "轻柔烘",
++          "degerm": "除菌",
++          "wool_care": "羊毛护理",
++          "sun_quilt": "晒被",
++          "uniforms": "工装",
++          "light_dry_wool": "轻柔烘羊毛",
++          "light_dry_shirt": "轻柔烘衬衫",
++          "light_dry_down_jacket": "轻柔烘羽绒",
++          "light_dry_silk": "轻柔烘丝绸",
++          "light_dry_big": "轻柔烘大物",
++          "light_dry_cotton": "轻柔烘棉织物",
++          "light_dry_mink_skin": "轻柔烘皮草",
++          "light_dry_towel": "轻柔烘毛巾",
++          "light_dry_suit": "轻柔烘西装",
++          "light_dry_pajamas": "轻柔烘睡衣",
++          "light_dry_baby_warm_clothe": "轻柔烘婴童暖衣",
++          "light_dry_seasonal_dispel": "轻柔烘季节驱散",
++          "light_dry_plush_toy": "轻柔烘毛绒玩具",
++          "light_dry_leather_clothe_care": "轻柔烘皮革护理",
++          "light_dry_wool_coat": "轻柔烘毛呢大衣",
++          "light_dry_silk_quilt": "轻柔烘蚕丝被",
++          "light_dry_pizex": "轻柔烘派克服",
++          "light_dry_chiffon": "轻柔烘雪纺",
++          "quick_dry_clothes": "速烘衣物",
++          "yoga_clothes": "瑜伽服"
++        }
++      },
++      "dc_location_selection": {
++        "name": "烘干筒位置",
++        "state": {
++          "left": "左筒",
++          "right": "右筒"
++        }
++      },
++      "dry_time": {
++        "name": "烘干时长"
++      },
++      "temperature_level": {
++        "name": "温度档位"
++      },
++      "smell_time": {
++        "name": "除味时长"
++      },
++      "db_location": {
++        "name": "洗衣桶位置",
++        "state": {
++          "left": "左桶",
++          "right": "右桶"
++        }
+       }
+     },
+     "sensor": {
+@@ -2902,6 +3007,52 @@
+       },
+       "filter_use_per": {
+         "name": "滤芯使用百分比"
++      },
++      "dc_remain_time": {
++        "name": "烘干剩余时间"
++      },
++      "dc_running_status": {
++        "name": "烘干运行状态",
++        "state": {
++          "off": "关闭",
++          "standby": "待机",
++          "start": "启动",
++          "pause": "暂停",
++          "end": "结束",
++          "fault": "故障",
++          "delay_choosing": "延时选择",
++          "delay": "延时",
++          "delay_pause": "延时暂停",
++          "end_prevent_wrinkle": "防皱结束"
++        }
++      },
++      "dc_dry_status": {
++        "name": "烘干状态",
++        "state": {
++          "heating": "加热",
++          "ironing": "熨烫",
++          "cooling": "冷却",
++          "ending": "结束中",
++          "preventwrinkling": "防皱中",
++          "sterilizing": "杀菌中",
++          "steamironing": "蒸汽熨烫",
++          "dampproofing": "防潮中"
++        }
++      },
++      "dc_error_code": {
++        "name": "烘干错误代码"
++      },
++      "dc_intensity": {
++        "name": "烘干强度"
++      },
++      "dc_material": {
++        "name": "烘干材质"
++      },
++      "dc_appointment_end_time": {
++        "name": "烘干预约结束时间"
++      },
++      "db_appointment_end_time": {
++        "name": "洗涤预约结束时间"
+       }
+     },
+     "light": {
+@@ -2940,7 +3091,7 @@
+       "hosting_lower": {
+         "name": "PM2.5下阈值(停止净化)"
+       },
+-	    "fresh_air_fan_speed": {
++      "fresh_air_fan_speed": {
+         "name": "风量"
+       },
+       "steam_quantity": {
+@@ -2959,10 +3110,10 @@
+         "name": "照明亮度"
+       },
+       "custom_timing": {
+-        "name": "延时关灯" 
++        "name": "延时关灯"
+       },
+       "radar_induction_closing_time": {
+-        "name": "夜灯延时关闭" 
++        "name": "夜灯延时关闭"
+       },
+       "keep_warm_time": {
+         "name": "保温时间"
+@@ -3107,6 +3258,12 @@
+       },
+       "area2_gear": {
+         "name": "双区区域2档位"
++      },
++      "dc_appointment_time": {
++        "name": "烘干预约时长"
++      },
++      "db_appointment_time": {
++        "name": "洗涤预约时长"
+       }
+     },
+     "fan": {
+@@ -3128,16 +3285,16 @@
+       }
+     },
+     "switch": {
+-    "efficient": {
++      "efficient": {
+         "name": "低耗保温"
+       },
+-	  "prevent_super_cool": {
++      "prevent_super_cool": {
+         "name": "智控温"
+       },
+-	  "new_wind_machine": {
++      "new_wind_machine": {
+         "name": "新风开关"
+       },
+-	  "anion_status": {
++      "anion_status": {
+         "name": "除菌"
+       },
+       "radar_induction_enable": {
+@@ -3185,9 +3342,6 @@
+       "anion": {
+         "name": "负离子"
+       },
+-      "child_lock": {
+-        "name": "童锁"
+-      },
+       "airswitch": {
+         "name": "烘干存储开关"
+       },
+@@ -3197,9 +3351,6 @@
+       "filter_tip": {
+         "name": "除菌"
+       },
+-      "control_status": {
+-        "name": "启停"
+-      },
+       "add_water_flag": {
+         "name": "加水标志"
+       },
+@@ -3389,9 +3540,6 @@
+       "airDry_on_off": {
+         "name": "湿帘风干"
+       },
+-      "appointment": {
+-        "name": "预约"
+-      },
+       "aux_heat": {
+         "name": "电辅热"
+       },
+@@ -3462,7 +3610,7 @@
+         "name": "制冷启用"
+       },
+       "cycle_memory": {
+-        "name": "循环记忆"
++        "name": "筒记忆"
+       },
+       "damp_dry_signal": {
+         "name": "湿干信号"
+@@ -3471,7 +3619,7 @@
+         "name": "日间状态"
+       },
+       "db_baby_lock": {
+-        "name": "童锁"
++        "name": "洗涤童锁"
+       },
+       "db_clean_notification": {
+         "name": "清洁提醒"
+@@ -4121,7 +4269,7 @@
+       "forcetbh_state": {
+         "name": "强制待机"
+       },
+-	  "manul_humi": {
++      "manul_humi": {
+         "name": "加湿"
+       },
+       "manul_humi_value": {
+@@ -4213,6 +4361,83 @@
+       },
+       "sleep_state5": {
+         "name": "睡眠5"
++      },
++      "dc_power": {
++        "name": "烘干电源",
++        "state": {
++          "off": "关闭",
++          "on": "开启"
++        }
++      },
++      "dc_control_status": {
++        "name": "烘干启停",
++        "state": {
++          "pause": "暂停",
++          "start": "启动"
++        }
++      },
++      "dc_baby_lock": {
++        "name": "烘干童锁"
++      },
++      "dc_steam": {
++        "name": "蒸汽"
++      },
++      "dc_prevent_wrinkle": {
++        "name": "防皱"
++      },
++      "dc_ai": {
++        "name": "AI智能烘"
++      },
++      "dc_smell": {
++        "name": "除味"
++      },
++      "dc_intelligent_dampproof": {
++        "name": "智能防潮"
++      },
++      "dc_multidimensional_sterilize": {
++        "name": "多维除菌"
++      },
++      "dc_cycle_memory": {
++        "name": "筒记忆"
++      },
++      "dc_light": {
++        "name": "烘干照明"
++      },
++      "dc_sterilize": {
++        "name": "杀菌"
++      },
++      "dc_remind_sound": {
++        "name": "提示音"
++      },
++      "ai_dry": {
++        "name": "AI智能烘"
++      },
++      "smell": {
++        "name": "除味"
++      },
++      "wash_dry_link": {
++        "name": "洗烘联动"
++      },
++      "dc_appointment": {
++        "name": "烘干预约",
++        "state": {
++          "off": "关闭",
++          "on": "开启"
++        }
++      },
++      "db_appointment": {
++        "name": "洗涤预约",
++        "state": {
++          "off": "关闭",
++          "on": "开启"
++        }
++      },
++      "db_control_status": {
++        "name": "洗涤启停",
++        "state": {
++          "pause": "暂停",
++          "start": "启动"
++        }
+       }
+     },
+     "vacuum": {
+@@ -4229,4 +4454,4 @@
+       }
+     }
+   }
+-}
++}
+\ No newline at end of file
