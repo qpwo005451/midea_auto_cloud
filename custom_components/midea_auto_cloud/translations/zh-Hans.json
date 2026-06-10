@@ -1799,6 +1799,97 @@
           "4": "中高档",
           "5": "高档"
         }
+      },
+      "dc_program": {
+        "name": "烘干程序",
+        "state": {
+          "cotton": "棉织物",
+          "fiber": "化纤",
+          "mixed_wash": "混合洗",
+          "jean": "牛仔",
+          "bedsheet": "床单",
+          "outdoor": "户外服",
+          "down_jacket": "羽绒服",
+          "plush": "毛绒",
+          "wool": "羊毛",
+          "dehumidify": "除湿",
+          "cold_air_fresh_air": "冷风清新",
+          "hot_air_dry": "热风烘干",
+          "sport_clothes": "运动服",
+          "underwear": "内衣",
+          "baby_clothes": "婴童装",
+          "shirt": "衬衫",
+          "standard": "标准",
+          "quick_dry": "快烘",
+          "fresh_air": "清新",
+          "low_temp_dry": "低温烘",
+          "eco_dry": "节能烘",
+          "intelligent_dry": "智能烘",
+          "steam_care": "蒸汽护理",
+          "big": "大物",
+          "fixed_time_dry": "定时烘",
+          "night_dry": "夜间烘",
+          "bracket_dry": "支架烘",
+          "western_trouser": "西裤",
+          "dehumidification": "除潮",
+          "silk": "丝绸",
+          "bucket_self_clean": "筒自洁",
+          "ion_degerm": "离子除菌",
+          "ai_intelligent_dry": "AI智能烘",
+          "small": "小件",
+          "jacket": "夹克",
+          "air_wash": "空气洗",
+          "towel": "毛巾",
+          "four_piece_suit": "四件套",
+          "light_dry": "轻柔烘",
+          "degerm": "除菌",
+          "wool_care": "羊毛护理",
+          "sun_quilt": "晒被",
+          "uniforms": "工装",
+          "light_dry_wool": "轻柔烘羊毛",
+          "light_dry_shirt": "轻柔烘衬衫",
+          "light_dry_down_jacket": "轻柔烘羽绒",
+          "light_dry_silk": "轻柔烘丝绸",
+          "light_dry_big": "轻柔烘大物",
+          "light_dry_cotton": "轻柔烘棉织物",
+          "light_dry_mink_skin": "轻柔烘皮草",
+          "light_dry_towel": "轻柔烘毛巾",
+          "light_dry_suit": "轻柔烘西装",
+          "light_dry_pajamas": "轻柔烘睡衣",
+          "light_dry_baby_warm_clothe": "轻柔烘婴童暖衣",
+          "light_dry_seasonal_dispel": "轻柔烘季节驱散",
+          "light_dry_plush_toy": "轻柔烘毛绒玩具",
+          "light_dry_leather_clothe_care": "轻柔烘皮革护理",
+          "light_dry_wool_coat": "轻柔烘毛呢大衣",
+          "light_dry_silk_quilt": "轻柔烘蚕丝被",
+          "light_dry_pizex": "轻柔烘派克服",
+          "light_dry_chiffon": "轻柔烘雪纺",
+          "quick_dry_clothes": "速烘衣物",
+          "yoga_clothes": "瑜伽服"
+        }
+      },
+      "dc_location_selection": {
+        "name": "烘干筒位置",
+        "state": {
+          "left": "左筒",
+          "right": "右筒"
+        }
+      },
+      "dry_time": {
+        "name": "烘干时长"
+      },
+      "temperature_level": {
+        "name": "温度档位"
+      },
+      "smell_time": {
+        "name": "除味时长"
+      },
+      "db_location": {
+        "name": "洗衣桶位置",
+        "state": {
+          "left": "左桶",
+          "right": "右桶"
+        }
       }
     },
     "sensor": {
@@ -3027,6 +3118,52 @@
       },
       "filter_use_per": {
         "name": "滤芯使用百分比"
+      },
+      "dc_remain_time": {
+        "name": "烘干剩余时间"
+      },
+      "dc_running_status": {
+        "name": "烘干运行状态",
+        "state": {
+          "off": "关闭",
+          "standby": "待机",
+          "start": "启动",
+          "pause": "暂停",
+          "end": "结束",
+          "fault": "故障",
+          "delay_choosing": "延时选择",
+          "delay": "延时",
+          "delay_pause": "延时暂停",
+          "end_prevent_wrinkle": "防皱结束"
+        }
+      },
+      "dc_dry_status": {
+        "name": "烘干状态",
+        "state": {
+          "heating": "加热",
+          "ironing": "熨烫",
+          "cooling": "冷却",
+          "ending": "结束中",
+          "preventwrinkling": "防皱中",
+          "sterilizing": "杀菌中",
+          "steamironing": "蒸汽熨烫",
+          "dampproofing": "防潮中"
+        }
+      },
+      "dc_error_code": {
+        "name": "烘干错误代码"
+      },
+      "dc_intensity": {
+        "name": "烘干强度"
+      },
+      "dc_material": {
+        "name": "烘干材质"
+      },
+      "dc_appointment_end_time": {
+        "name": "烘干预约结束时间"
+      },
+      "db_appointment_end_time": {
+        "name": "洗涤预约结束时间"
       }
     },
     "light": {
@@ -3235,6 +3372,12 @@
       },
       "area2_gear": {
         "name": "双区区域2档位"
+      },
+      "dc_appointment_time": {
+        "name": "烘干预约时长"
+      },
+      "db_appointment_time": {
+        "name": "洗涤预约时长"
       }
     },
     "fan": {
@@ -3647,7 +3790,7 @@
         "name": "日间状态"
       },
       "db_baby_lock": {
-        "name": "童锁"
+        "name": "洗涤童锁"
       },
       "db_clean_notification": {
         "name": "清洁提醒"
@@ -4389,6 +4532,83 @@
       },
       "sleep_state5": {
         "name": "睡眠5"
+      },
+      "dc_power": {
+        "name": "烘干电源",
+        "state": {
+          "off": "关闭",
+          "on": "开启"
+        }
+      },
+      "dc_control_status": {
+        "name": "烘干启停",
+        "state": {
+          "pause": "暂停",
+          "start": "启动"
+        }
+      },
+      "dc_baby_lock": {
+        "name": "烘干童锁"
+      },
+      "dc_steam": {
+        "name": "蒸汽"
+      },
+      "dc_prevent_wrinkle": {
+        "name": "防皱"
+      },
+      "dc_ai": {
+        "name": "AI智能烘"
+      },
+      "dc_smell": {
+        "name": "除味"
+      },
+      "dc_intelligent_dampproof": {
+        "name": "智能防潮"
+      },
+      "dc_multidimensional_sterilize": {
+        "name": "多维除菌"
+      },
+      "dc_cycle_memory": {
+        "name": "筒记忆"
+      },
+      "dc_light": {
+        "name": "烘干照明"
+      },
+      "dc_sterilize": {
+        "name": "杀菌"
+      },
+      "dc_remind_sound": {
+        "name": "提示音"
+      },
+      "ai_dry": {
+        "name": "AI智能烘"
+      },
+      "smell": {
+        "name": "除味"
+      },
+      "wash_dry_link": {
+        "name": "洗烘联动"
+      },
+      "dc_appointment": {
+        "name": "烘干预约",
+        "state": {
+          "off": "关闭",
+          "on": "开启"
+        }
+      },
+      "db_appointment": {
+        "name": "洗涤预约",
+        "state": {
+          "off": "关闭",
+          "on": "开启"
+        }
+      },
+      "db_control_status": {
+        "name": "洗涤启停",
+        "state": {
+          "pause": "暂停",
+          "start": "启动"
+        }
       },
       "natural_wind": {
         "name": "自然风"

@@ -1524,6 +1524,32 @@
           "4": "Medium High",
           "5": "High"
         }
+      },
+      "dc_program": {
+        "name": "Dry Program"
+      },
+      "dc_location_selection": {
+        "name": "Dry Bucket Location",
+        "state": {
+          "left": "Left",
+          "right": "Right"
+        }
+      },
+      "dry_time": {
+        "name": "Dry Duration"
+      },
+      "temperature_level": {
+        "name": "Temperature Level"
+      },
+      "smell_time": {
+        "name": "Deodorize Duration"
+      },
+      "db_location": {
+        "name": "Wash Bucket Location",
+        "state": {
+          "left": "Left",
+          "right": "Right"
+        }
       }
     },
     "sensor": {
@@ -2695,6 +2721,30 @@
       "filter_use_per": {
         "name": "Filter Use Percentage"
       },
+      "dc_remain_time": {
+        "name": "Dry Remaining Time"
+      },
+      "dc_running_status": {
+        "name": "Dry Running Status"
+      },
+      "dc_dry_status": {
+        "name": "Dry Status"
+      },
+      "dc_error_code": {
+        "name": "Dry Error Code"
+      },
+      "dc_intensity": {
+        "name": "Dry Intensity"
+      },
+      "dc_material": {
+        "name": "Dry Material"
+      },
+      "dc_appointment_end_time": {
+        "name": "Dryer Appointment End Time"
+      },
+      "db_appointment_end_time": {
+        "name": "Washer Appointment End Time"
+      },
       "indoor_humidity": {
         "name": "Indoor Humidity"
       }
@@ -2887,6 +2937,12 @@
       },
       "area2_gear": {
         "name": "Double Area Area 2 Gear"
+      },
+      "dc_appointment_time": {
+        "name": "Dryer Appointment Duration"
+      },
+      "db_appointment_time": {
+        "name": "Washer Appointment Duration"
       }
     },
     "fan": {
@@ -3289,7 +3345,7 @@
         "name": "Day Time State"
       },
       "db_baby_lock": {
-        "name": "DB Baby Lock"
+        "name": "Washer Child Lock"
       },
       "db_clean_notification": {
         "name": "DB Clean Notification"
@@ -4034,6 +4090,83 @@
       },
       "sleep_state5": {
         "name": "Sleep 5"
+      },
+      "dc_power": {
+        "name": "Dryer Power",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "dc_control_status": {
+        "name": "Dryer Start/Stop",
+        "state": {
+          "pause": "Pause",
+          "start": "Start"
+        }
+      },
+      "dc_baby_lock": {
+        "name": "Dryer Child Lock"
+      },
+      "dc_steam": {
+        "name": "Steam"
+      },
+      "dc_prevent_wrinkle": {
+        "name": "Wrinkle Prevention"
+      },
+      "dc_ai": {
+        "name": "AI Smart Dry"
+      },
+      "dc_smell": {
+        "name": "Deodorize"
+      },
+      "dc_intelligent_dampproof": {
+        "name": "Smart Damp Proof"
+      },
+      "dc_multidimensional_sterilize": {
+        "name": "Multi-D Sterilize"
+      },
+      "dc_cycle_memory": {
+        "name": "Cycle Memory"
+      },
+      "dc_light": {
+        "name": "Dryer Light"
+      },
+      "dc_sterilize": {
+        "name": "Sterilize"
+      },
+      "dc_remind_sound": {
+        "name": "Reminder Sound"
+      },
+      "ai_dry": {
+        "name": "AI Smart Dry"
+      },
+      "smell": {
+        "name": "Deodorize"
+      },
+      "wash_dry_link": {
+        "name": "Wash-Dry Link"
+      },
+      "dc_appointment": {
+        "name": "Dryer Appointment",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "db_appointment": {
+        "name": "Washer Appointment",
+        "state": {
+          "off": "Off",
+          "on": "On"
+        }
+      },
+      "db_control_status": {
+        "name": "Washer Start/Stop",
+        "state": {
+          "pause": "Pause",
+          "start": "Start"
+        }
       },
       "natural_wind": {
         "name": "Natural Wind"
