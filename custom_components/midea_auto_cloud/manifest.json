@@ -1,11 +1,11 @@
 {
   "domain": "midea_auto_cloud",
   "name": "Midea Auto Cloud",
-  "codeowners": ["@sususweet"],
+  "codeowners": ["@qpwo005451"],
   "config_flow": true,
-  "documentation": "https://github.com/sususweet/midea-meiju-codec#readme",
+  "documentation": "https://github.com/qpwo005451/midea_auto_cloud#readme",
   "iot_class": "cloud_push",
-  "issue_tracker": "https://github.com/sususweet/midea-meiju-codec/issues",
+  "issue_tracker": "https://github.com/qpwo005451/midea_auto_cloud/issues",
   "requirements": ["lupa>=2.0"],
-  "version": "v0.3.5"
+  "version": "v0.3.5-d9.1"
 }
